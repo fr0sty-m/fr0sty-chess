@@ -1,4 +1,4 @@
-name: Windows Build
+name: Windows Build (MSYS2 UCRT64)
 
 on:
   push:
@@ -13,26 +13,29 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Setup vcpkg
-      run: |
-        git clone https://github.com/microsoft/vcpkg.git
-        ./vcpkg/bootstrap-vcpkg.bat
+    - name: Setup MSYS2
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: UCRT64
+        update: true
+        install: >-
+          mingw-w64-ucrt-x86_64-toolchain
+          mingw-w64-ucrt-x86_64-cmake
+          mingw-w64-ucrt-x86_64-sfml
 
-    - name: Install SFML via vcpkg
-      run: |
-        ./vcpkg/vcpkg install sfml:x64-windows
-
-    - name: Configure CMake
-      run: |
-        cmake -B build -S . `
-          "-DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" `
-          -DVCPKG_TARGET_TRIPLET=x64-windows
-          
     - name: Build Project
-      run: cmake --build build --config Release
+      shell: msys2 {0}
+      run: |
+        cmake -B build -S . -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release
+        cmake --build build
+
+    - name: Copy DLLs
+      shell: msys2 {0}
+      run: |
+        cp /ucrt64/bin/*.dll build/
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
         name: Chess-Game-Windows
-        path: build/Release/
+        path: build/
