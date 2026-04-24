@@ -1,6 +1,7 @@
 #include "Board.h"
 
 #include "Assets.h"
+#include "MoveValidator.h"
 #include "Piece.h"
 
 #include <iostream>
@@ -51,89 +52,79 @@ void Board::onMouseMoved(sf::Vector2i mousePos) {
   if (!mousePressed)
     return;
 
-  int dx = mousePos.x - dragStartSquare.x * tileSize;
-  int dy = mousePos.y - dragStartSquare.y * tileSize;
-
-  if (!isDragging && (std::abs(dx) > 5 || std::abs(dy) > 5)) {
-    int col = dragStartSquare.x;
-    int row = dragStartSquare.y;
-
-    if (col < 0 || col >= 8 || row < 0 || row >= 8)
-      return;
-    if (grid[row][col].type == PieceType::None)
+  if (!isDragging &&
+      (std::abs(mousePos.x - dragStartSquare.x * tileSize) > 5 ||
+       std::abs(mousePos.y - dragStartSquare.y * tileSize) > 5)) {
+    int col = dragStartSquare.x, row = dragStartSquare.y;
+    if (col < 0 || col >= 8 || row < 0 || row >= 8 ||
+        grid[row][col].type == PieceType::None)
       return;
 
     isDragging = true;
     draggedPiece = grid[row][col];
-
-    // ÇÖZÜM: Sürükleme başladığı an orijinal kareyi boşalt
     grid[row][col] = {PieceType::None, PieceColor::None};
-
     dragOffset = {(float)mousePos.x - col * tileSize,
                   (float)mousePos.y - row * tileSize};
   }
-
-  if (isDragging) {
+  if (isDragging)
     currentMousePos = (sf::Vector2f)mousePos;
-  }
 }
 
 void Board::onMouseReleased(sf::Vector2i mousePos) {
   if (!mousePressed)
     return;
-
-  int col = mousePos.x / tileSize;
-  int row = mousePos.y / tileSize;
+  int col = mousePos.x / tileSize, row = mousePos.y / tileSize;
 
   if (isDragging) {
-    // Zaten onMouseMoved içinde sildiğimiz için burada tekrar silmeye gerek yok
-    if (col >= 0 && col < 8 && row >= 0 && row < 8) {
+    // 1. Taşı geçici olarak yerine koy (Validator'ın görmesi için)
+    grid[dragStartSquare.y][dragStartSquare.x] = draggedPiece;
+
+    // 2. Şimdi kontrol et
+    if (col >= 0 && col < 8 && row >= 0 && row < 8 &&
+        MoveValidator::isValidMove(dragStartSquare, {col, row}, grid)) {
+
+      // Hamle geçerliyse: Eski yeri boşalt, yeni yere taşı
+      grid[dragStartSquare.y][dragStartSquare.x] = {PieceType::None,
+                                                    PieceColor::None};
       grid[row][col] = draggedPiece;
     } else {
-      // Geçersiz yer: Geri koy
-      grid[dragStartSquare.y][dragStartSquare.x] = draggedPiece;
+      // Hamle geçersizse: Taş zaten yukarıda geri konuldu, ekstra bir şey
+      // yapmaya gerek yok.
     }
+
     isDragging = false;
-    selectedSquare = {-1, -1}; // ÇÖZÜM: Sürükleme bitince seçimi temizle
+    selectedSquare = {-1, -1};
   } else {
     handleInput(mousePos);
   }
-
   mousePressed = false;
 }
 
 void Board::handleInput(sf::Vector2i mousePos) {
-  int col = mousePos.x / tileSize;
-  int row = mousePos.y / tileSize;
-
+  int col = mousePos.x / tileSize, row = mousePos.y / tileSize;
   if (col < 0 || col >= 8 || row < 0 || row >= 8)
     return;
 
   if (selectedSquare.x == -1) {
-    if (grid[row][col].type != PieceType::None) {
+    if (grid[row][col].type != PieceType::None)
       selectedSquare = {col, row};
-    }
   } else {
-
     if (selectedSquare.x == col && selectedSquare.y == row) {
       selectedSquare = {-1, -1};
       return;
     }
 
-    Piece moving = grid[selectedSquare.y][selectedSquare.x];
-
-    movingPiece.piece = moving;
-    movingPiece.startPos = {(float)selectedSquare.x * tileSize,
-                            (float)selectedSquare.y * tileSize};
-
-    movingPiece.endPos = {(float)col * tileSize, (float)row * tileSize};
-
-    movingPiece.progress = 0.f;
-    movingPiece.active = true;
-
-    grid[selectedSquare.y][selectedSquare.x] = {PieceType::None,
-                                                PieceColor::None};
-
+    // VALIDATOR BURADA DA DEVREYE GİRİYOR
+    if (MoveValidator::isValidMove(selectedSquare, {col, row}, grid)) {
+      movingPiece.piece = grid[selectedSquare.y][selectedSquare.x];
+      movingPiece.startPos = {(float)selectedSquare.x * tileSize,
+                              (float)selectedSquare.y * tileSize};
+      movingPiece.endPos = {(float)col * tileSize, (float)row * tileSize};
+      movingPiece.progress = 0.f;
+      movingPiece.active = true;
+      grid[selectedSquare.y][selectedSquare.x] = {PieceType::None,
+                                                  PieceColor::None};
+    }
     selectedSquare = {-1, -1};
   }
 }
@@ -330,7 +321,6 @@ void Board::draw(sf::RenderWindow *window) {
       float scale = (float)tileSize / tex.getSize().x;
       sprite.setScale({scale, scale});
 
-      // 🔥 mouse'u takip eder
       sprite.setPosition(currentMousePos - dragOffset);
 
       window->draw(sprite);

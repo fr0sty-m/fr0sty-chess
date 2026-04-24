@@ -5,59 +5,35 @@
 
 #include <SFML/Graphics.hpp>
 
-enum class BoardColor {
-  Green,
-  Red,
-  Blue,
-  Black,
-};
+enum class BoardColor { Green, Red, Blue, Black };
 
 class Board {
 private:
   struct MovingPiece {
     Piece piece;
-    sf::Vector2f startPos;
-    sf::Vector2f endPos;
+    sf::Vector2f startPos, endPos;
     float progress = 0.f;
     bool active = false;
   };
 
-private:
   int tileSize;
-
   Piece grid[8][8];
-
   sf::Vector2i selectedSquare;
-
-  // input state
-  bool mousePressed = false;
-
-  // drag state
-  bool isDragging = false;
+  bool mousePressed = false, isDragging = false;
   Piece draggedPiece;
   sf::Vector2i dragStartSquare;
-  sf::Vector2f dragOffset;
-  sf::Vector2f currentMousePos;
-
+  sf::Vector2f dragOffset, currentMousePos;
   MovingPiece movingPiece;
 
 public:
   colors boardColors;
-
-public:
   Board(BoardColor boardColor);
-
   colors selectStyle(BoardColor boardColor);
-
   void onMousePressed(sf::Vector2i mousePos);
   void onMouseMoved(sf::Vector2i mousePos);
   void onMouseReleased(sf::Vector2i mousePos);
-
   void handleInput(sf::Vector2i mousePos);
-
   void update(float dt);
-
   void setupPieces();
-
   void draw(sf::RenderWindow *window);
 };
