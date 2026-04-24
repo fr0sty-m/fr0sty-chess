@@ -34,14 +34,17 @@ jobs:
       run: |
         cp /ucrt64/bin/*.dll build/
         cp -r assets build/
-        rm -rf build/CMakeFiles \
-        build/cmake_install.cmake \
-        build/CMakeCache.txt \
-        build/compile_commands.json\
-        build/Makefile
+
+    - name: Prepare Release Package
+      shell: msys2 {0}
+      run: |
+        mkdir -p dist
+        cp build/*.exe dist/
+        cp build/*.dll dist/
+        cp -r assets dist/
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
         name: Chess-Game-Windows
-        path: build/
+        path: dist/
