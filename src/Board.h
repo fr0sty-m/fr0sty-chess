@@ -24,7 +24,6 @@ private:
 
 private:
   int tileSize;
-  colors boardColors;
 
   Piece grid[8][8];
 
@@ -41,6 +40,9 @@ private:
   sf::Vector2f currentMousePos;
 
   MovingPiece movingPiece;
+
+public:
+  colors boardColors;
 
 public:
   Board(BoardColor boardColor);

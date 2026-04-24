@@ -3,6 +3,7 @@
 #include "Assets.h"
 #include "Board.h"
 #include <SFML/Window/Event.hpp>
+#include <SFML/Window/Keyboard.hpp>
 #include <SFML/Window/Mouse.hpp>
 
 Game::Game() { this->initGame(); }
@@ -31,7 +32,7 @@ void Game::initGame() {
     }
   }
 
-  board = new Board(BoardColor::Blue);
+  board = new Board(BoardColor::Black);
   board->setupPieces();
 }
 
@@ -60,6 +61,18 @@ void Game::events() {
     if (const auto *mouseEvent = event->getIf<sf::Event::MouseMoved>()) {
 
       board->onMouseMoved(sf::Mouse::getPosition(*window));
+    }
+
+    if (const auto *keyEvent = event->getIf<sf::Event::KeyPressed>()) {
+      if (keyEvent->code == sf::Keyboard::Key::M) {
+        board->selectStyle(BoardColor::Blue);
+      } else if (keyEvent->code == sf::Keyboard::Key::R) {
+        board->selectStyle(BoardColor::Red);
+      } else if (keyEvent->code == sf::Keyboard::Key::G) {
+        board->selectStyle(BoardColor::Green);
+      } else if (keyEvent->code == sf::Keyboard::Key::B) {
+        board->selectStyle(BoardColor::Black);
+      }
     }
   }
 }
