@@ -29,10 +29,16 @@ jobs:
         cmake -B build -S . -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release
         cmake --build build
 
-    - name: Copy DLLs
+    - name: Copy DLL and Delete Build Files
       shell: msys2 {0}
       run: |
         cp /ucrt64/bin/*.dll build/
+        cp assets build/
+        rm -rf build/CMakeFiles \
+        build/cmake_install.cmake \
+        build/CMakeCache.txt \
+        build/compile_commands.json\
+        build/Makefile
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
