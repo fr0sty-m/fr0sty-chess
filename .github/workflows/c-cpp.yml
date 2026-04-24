@@ -33,8 +33,7 @@ jobs:
       shell: msys2 {0}
       run: |
         cp /ucrt64/bin/*.dll build/
-        ls
-        cp assets build/
+        cp -r assets build/
         rm -rf build/CMakeFiles \
         build/cmake_install.cmake \
         build/CMakeCache.txt \
