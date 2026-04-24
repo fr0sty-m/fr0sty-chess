@@ -8,7 +8,7 @@
 Game::Game() { this->initGame(); }
 
 void Game::initGame() {
-  window = new sf::RenderWindow{sf::VideoMode({800, 800}), "fr0sty Chess v0.1",
+  window = new sf::RenderWindow{sf::VideoMode({800, 800}), "fr0sty Chess",
                                 sf::Style::Close};
   window->setFramerateLimit(120);
 
@@ -25,34 +25,54 @@ void Game::initGame() {
       std::string path = "assets/" + key + ".png";
 
       if (!assets.loadTexture(key, path)) {
-        // Eğer burada hata basarsa terminale bak, dosya yolu yanlıştır
         printf("ERROR: %s Could not load! Path: %s\n", key.c_str(),
                path.c_str());
       }
     }
   }
 
-  board = new Board(BoardColor::Black);
+  board = new Board(BoardColor::Blue);
   board->setupPieces();
 }
 
 void Game::events() {
   while (const std::optional event = window->pollEvent()) {
+
     if (event->is<sf::Event::Closed>())
       window->close();
 
     if (const auto *mouseEvent =
             event->getIf<sf::Event::MouseButtonPressed>()) {
+
       if (mouseEvent->button == sf::Mouse::Button::Left) {
-        board->handleInput(sf::Mouse::getPosition(*window));
+        board->onMousePressed(sf::Mouse::getPosition(*window));
       }
+    }
+
+    if (const auto *mouseEvent =
+            event->getIf<sf::Event::MouseButtonReleased>()) {
+
+      if (mouseEvent->button == sf::Mouse::Button::Left) {
+        board->onMouseReleased(sf::Mouse::getPosition(*window));
+      }
+    }
+
+    if (const auto *mouseEvent = event->getIf<sf::Event::MouseMoved>()) {
+
+      board->onMouseMoved(sf::Mouse::getPosition(*window));
     }
   }
 }
 
 void Game::tick() {
+  sf::Clock clock;
+
   while (window->isOpen()) {
+    float dt = clock.restart().asSeconds();
+
     this->events();
+
+    board->update(dt);
 
     this->draw();
   }
