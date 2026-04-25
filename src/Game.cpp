@@ -9,7 +9,7 @@
 Game::Game() { this->initGame(); }
 
 void Game::initGame() {
-  window = new sf::RenderWindow{sf::VideoMode({800, 800}), "fr0sty Chess",
+  window = new sf::RenderWindow{sf::VideoMode({1280, 800}), "fr0sty Chess",
                                 sf::Style::Close};
   window->setFramerateLimit(120);
 
@@ -32,7 +32,7 @@ void Game::initGame() {
     }
   }
 
-  board = new Board(BoardColor::Black);
+  board = new Board(BoardColor::Green, &gm);
   board->setupPieces();
 }
 
@@ -62,18 +62,6 @@ void Game::events() {
 
       board->onMouseMoved(sf::Mouse::getPosition(*window));
     }
-
-    if (const auto *keyEvent = event->getIf<sf::Event::KeyPressed>()) {
-      if (keyEvent->code == sf::Keyboard::Key::M) {
-        board->selectStyle(BoardColor::Blue);
-      } else if (keyEvent->code == sf::Keyboard::Key::R) {
-        board->selectStyle(BoardColor::Red);
-      } else if (keyEvent->code == sf::Keyboard::Key::G) {
-        board->selectStyle(BoardColor::Green);
-      } else if (keyEvent->code == sf::Keyboard::Key::B) {
-        board->selectStyle(BoardColor::Black);
-      }
-    }
   }
 }
 
@@ -92,7 +80,7 @@ void Game::tick() {
 }
 
 void Game::draw() {
-  window->clear();
+  window->clear(sf::Color{80, 80, 80});
 
   board->draw(window);
 

@@ -4,43 +4,33 @@
 #include "MoveValidator.h"
 #include "Piece.h"
 
+#include "Definitions.h"
+
 #include <iostream>
 
-Board::Board(BoardColor boardColor)
-    : boardColors(selectStyle(boardColor)), tileSize(100) {
+Board::Board(BoardColor boardColor, GameManager *gm)
+    : boardColors(selectStyle(boardColor)), tileSize(100), gameManager(gm) {
   selectedSquare = {-1, -1};
   movingPiece.active = false;
   isDragging = false;
 }
 
 colors Board::selectStyle(BoardColor boardStyle) {
-  sf::Color darkColor;
-  sf::Color lightColor;
-
   switch (boardStyle) {
+  case BoardColor::None:
+    return {NONE, NONE};
   case BoardColor::Green:
-    lightColor = {238, 238, 210};
-    darkColor = {118, 150, 86};
-    break;
+    return {GREEN_DARK, GREEN_LIGHT};
   case BoardColor::Red:
-    lightColor = {238, 238, 210};
-    darkColor = {227, 93, 93};
-    break;
+    return {RED_DARK, RED_LIGHT};
   case BoardColor::Blue:
-    lightColor = {238, 238, 210};
-    darkColor = {97, 116, 201};
-    break;
+    return {BLUE_DARK, BLUE_LIGHT};
   case BoardColor::Black:
-    lightColor = {238, 238, 210};
-    darkColor = {53, 53, 53};
-    break;
+    return {BLACK_DARK, BLACK_LIGHT};
   default:
-    lightColor = {238, 238, 210};
-    darkColor = {118, 150, 86};
-    break;
+    return {RED_DARK, RED_LIGHT};
   }
-
-  return {darkColor, lightColor};
+  return {RED_DARK, RED_LIGHT};
 }
 
 void Board::onMousePressed(sf::Vector2i mousePos) {
@@ -76,25 +66,33 @@ void Board::onMouseReleased(sf::Vector2i mousePos) {
   int col = mousePos.x / tileSize, row = mousePos.y / tileSize;
 
   if (isDragging) {
-    // 1. Taşı geçici olarak yerine koy (Validator'ın görmesi için)
+    // 1. Taşı geçici olarak yerine koy (Validator görsün diye)
     grid[dragStartSquare.y][dragStartSquare.x] = draggedPiece;
 
-    // 2. Şimdi kontrol et
+    // 2. Kontrol et: Sıra bu renkte mi? + Hamle kurallara uygun mu?
     if (col >= 0 && col < 8 && row >= 0 && row < 8 &&
+        draggedPiece.color == gameManager->getCurrentTurn() &&
         MoveValidator::isValidMove(dragStartSquare, {col, row}, grid)) {
 
-      // Hamle geçerliyse: Eski yeri boşalt, yeni yere taşı
+      // Hamle GEÇERLİ
       grid[dragStartSquare.y][dragStartSquare.x] = {PieceType::None,
                                                     PieceColor::None};
       grid[row][col] = draggedPiece;
+
+      // GameManager'a haber ver (Sırayı değiştirir ve geçmişe ekler)
+      gameManager->addMove(dragStartSquare, {col, row}, draggedPiece, false);
+      gameManager->switchTurn();
+
     } else {
-      // Hamle geçersizse: Taş zaten yukarıda geri konuldu, ekstra bir şey
-      // yapmaya gerek yok.
+      // Hamle GEÇERSİZ: Taş zaten geçici olarak eski yerine konmuştu,
+      // sadece isDragging'i kapatmamız yeterli.
     }
 
     isDragging = false;
     selectedSquare = {-1, -1};
   } else {
+    // Tıklayarak oynatma (handleInput) kısmını da benzer şekilde GM'e
+    // bağlamalısın
     handleInput(mousePos);
   }
   mousePressed = false;
@@ -102,29 +100,53 @@ void Board::onMouseReleased(sf::Vector2i mousePos) {
 
 void Board::handleInput(sf::Vector2i mousePos) {
   int col = mousePos.x / tileSize, row = mousePos.y / tileSize;
+
+  // Tahta dışı tıklamaları engelle
   if (col < 0 || col >= 8 || row < 0 || row >= 8)
     return;
 
+  // 1. DURUM: Henüz bir taş seçilmemişse
   if (selectedSquare.x == -1) {
-    if (grid[row][col].type != PieceType::None)
+    // Sadece taş olan ve sırası gelen renkteki taşı seç
+    if (grid[row][col].type != PieceType::None &&
+        grid[row][col].color == gameManager->getCurrentTurn()) {
       selectedSquare = {col, row};
-  } else {
+    }
+  }
+  // 2. DURUM: Bir taş zaten seçiliyse (Hedef kare seçiliyor)
+  else {
+    // Eğer aynı kareye tıklandıysa seçimi iptal et
     if (selectedSquare.x == col && selectedSquare.y == row) {
       selectedSquare = {-1, -1};
       return;
     }
 
-    // VALIDATOR BURADA DA DEVREYE GİRİYOR
+    // Seçili taştan hedef kareye hamle geçerli mi?
     if (MoveValidator::isValidMove(selectedSquare, {col, row}, grid)) {
+
+      // Animasyon verilerini hazırla
       movingPiece.piece = grid[selectedSquare.y][selectedSquare.x];
       movingPiece.startPos = {(float)selectedSquare.x * tileSize,
                               (float)selectedSquare.y * tileSize};
       movingPiece.endPos = {(float)col * tileSize, (float)row * tileSize};
       movingPiece.progress = 0.f;
       movingPiece.active = true;
+
+      // Kaynak kareyi boşalt
       grid[selectedSquare.y][selectedSquare.x] = {PieceType::None,
                                                   PieceColor::None};
+
+      // --- OYUN MANTIĞI BURADA DEVREYE GİRİYOR ---
+      // Hamleyi geçmişe ekle
+      bool isCapture = (grid[row][col].type != PieceType::None);
+      gameManager->addMove(selectedSquare, {col, row}, movingPiece.piece,
+                           isCapture);
+
+      // Turu değiştir (Animasyon başlarken sıra karşıya geçer)
+      gameManager->switchTurn();
     }
+
+    // Hamle yapılsın ya da yapılmasın, seçimi temizle
     selectedSquare = {-1, -1};
   }
 }
@@ -182,7 +204,7 @@ void Board::draw(sf::RenderWindow *window) {
             sf::Vector2f({(float)tileSize, (float)tileSize}));
 
         highlight.setPosition({(float)col * tileSize, (float)row * tileSize});
-        highlight.setFillColor(sf::Color(209, 71, 71, 150));
+        highlight.setFillColor(HIGHTLIGHT_COLOR);
         window->draw(highlight);
       }
       // -----------------------------------

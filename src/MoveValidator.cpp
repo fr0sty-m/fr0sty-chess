@@ -10,6 +10,11 @@ bool MoveValidator::isValidMove(sf::Vector2i start, sf::Vector2i end,
   Piece movingPiece = grid[start.y][start.x];
   Piece targetPiece = grid[end.y][end.x];
 
+  // Eğer hedef karede bir Şah varsa, o kareye gidilemez.
+  if (targetPiece.type == PieceType::King) {
+    return false;
+  }
+
   // Kendi taşını yeme kontrolü
   if (targetPiece.type != PieceType::None &&
       targetPiece.color == movingPiece.color)

@@ -9,6 +9,8 @@ find_package(SFML 3.0 REQUIRED COMPONENTS Graphics Window System Audio)
 add_executable(${PROJECT_NAME}
   src/main.cpp
 
+  src/Definitions.h
+
   src/Board.cpp
   src/Board.h
 
@@ -20,6 +22,9 @@ add_executable(${PROJECT_NAME}
 
   src/MoveValidator.cpp
   src/MoveValidator.h
+
+  src/GameManager.cpp
+  src/GameManager.h
 
   src/Piece.h
   src/Colors.h
