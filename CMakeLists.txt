@@ -20,6 +20,9 @@ add_executable(${PROJECT_NAME}
   src/Assets.cpp
   src/Assets.h
 
+  src/Config.cpp
+  src/Config.h
+
   src/MoveValidator.cpp
   src/MoveValidator.h
 

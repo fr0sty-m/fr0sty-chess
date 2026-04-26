@@ -2,9 +2,9 @@
 
 #include "Assets.h"
 #include "Board.h"
-#include <SFML/Window/Event.hpp>
-#include <SFML/Window/Keyboard.hpp>
-#include <SFML/Window/Mouse.hpp>
+#include "Config.h"
+
+#include <iostream>
 
 Game::Game() { this->initGame(); }
 
@@ -14,6 +14,11 @@ void Game::initGame() {
   window->setFramerateLimit(120);
 
   auto &assets = Assets::getInstance();
+  auto &cfg = Config::getInstance();
+
+  cfg.load("./config.ini");
+
+  std::string boardTheme = cfg.get("board.theme", "teal");
 
   // Yükleme listesi (İsimleri Board.cpp'deki switch ile uyumlu yapıyoruz)
   std::vector<std::string> colors = {"white_", "black_"};
@@ -32,7 +37,7 @@ void Game::initGame() {
     }
   }
 
-  board = new Board(BoardColor::Green, &gm);
+  board = new Board(boardTheme, &gm);
   board->setupPieces();
 }
 
@@ -60,6 +65,16 @@ void Game::events() {
 
     if (const auto *mouseEvent = event->getIf<sf::Event::MouseMoved>()) {
       board->onMouseMoved(sf::Mouse::getPosition(*window));
+    }
+
+    if (const auto *keyEvent = event->getIf<sf::Event::KeyPressed>()) {
+      if (keyEvent->code == sf::Keyboard::Key::F5) {
+        Config::getInstance().reload();
+
+        std::string newTheme = Config::getInstance().get("board.theme", "teal");
+
+        board->setTheme(Board::themeToColor(newTheme));
+      }
     }
   }
 }

@@ -7,7 +7,20 @@
 #include <SFML/Graphics.hpp>
 
 // ================= BOARD COLOR ======================
-enum class BoardColor { None, Orange, Green, Red, Blue, Black };
+enum class BoardColor {
+  None,
+  Orange,
+  Green,
+  Red,
+  Blue,
+  Black,
+  Dark,
+  Purple,
+  Gray,
+  Chesscom,
+  Teal,
+  Lichess,
+};
 // ====================================================
 
 class Board {
@@ -43,13 +56,18 @@ private:
   void drawMoving(sf::RenderWindow *window);
   void drawCoords(sf::RenderWindow *window, const sf::Font &font);
   void drawUI(sf::RenderWindow *window, const sf::Font &font);
+  void drawHighlight(sf::RenderWindow *window);
 
 public:
   Board(BoardColor boardColor, GameManager *gm);
+  Board(std::string boardColor, GameManager *gm);
 
   colors boardColors;
 
   colors selectStyle(BoardColor boardColor);
+  static BoardColor themeToColor(const std::string &theme);
+  void setTheme(BoardColor newColor);
+
   void setupPieces();
 
   void onMousePressed(sf::Vector2i mousePos);

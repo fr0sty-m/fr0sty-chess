@@ -3,6 +3,7 @@
 #include "Assets.h"
 #include "MoveValidator.h"
 
+#include "Config.h"
 #include "Definitions.h"
 
 #include <cmath>
@@ -21,22 +22,87 @@ Board::Board(BoardColor boardColor, GameManager *gm)
                                  "/usr/share/fonts/TTF/Hack-Bold.ttf");
 }
 
+Board::Board(std::string boardColor, GameManager *gm)
+    : boardColors(selectStyle(themeToColor(boardColor))), tileSize(100),
+      gameManager(gm) {
+  selectedSquare = {-1, -1};
+
+  Assets::getInstance().loadFont(
+      "main", "/usr/share/fonts/TTF/CaskaydiaCoveNerdFont-Bold.ttf");
+
+  Assets::getInstance().loadFont("coord_font",
+                                 "/usr/share/fonts/TTF/Hack-Bold.ttf");
+
+  std::string theme = Config::getInstance().get("board.theme", "teal");
+}
+
 // ================= STYLE =================
+
+BoardColor Board::themeToColor(const std::string &theme) {
+  if (theme == "green")
+    return BoardColor::Green;
+  if (theme == "red")
+    return BoardColor::Red;
+  if (theme == "blue")
+    return BoardColor::Blue;
+  if (theme == "orange")
+    return BoardColor::Orange;
+  if (theme == "black")
+    return BoardColor::Black;
+  if (theme == "dark")
+    return BoardColor::Dark;
+  if (theme == "purple")
+    return BoardColor::Purple;
+  if (theme == "teal")
+    return BoardColor::Teal;
+  if (theme == "gray")
+    return BoardColor::Gray;
+  if (theme == "chesscom")
+    return BoardColor::Chesscom;
+  if (theme == "lichess")
+    return BoardColor::Lichess;
+
+  return BoardColor::Teal;
+}
 
 colors Board::selectStyle(BoardColor style) {
   switch (style) {
-  case BoardColor::Orange:
-    return {ORANGE_DARK, ORANGE_LIGHT};
+
   case BoardColor::Green:
     return {GREEN_DARK, GREEN_LIGHT};
+
   case BoardColor::Red:
     return {RED_DARK, RED_LIGHT};
+
   case BoardColor::Blue:
     return {BLUE_DARK, BLUE_LIGHT};
+
+  case BoardColor::Orange:
+    return {ORANGE_DARK, ORANGE_LIGHT};
+
   case BoardColor::Black:
     return {BLACK_DARK, BLACK_LIGHT};
+
+  case BoardColor::Dark:
+    return {DARK_DARK, DARK_LIGHT};
+
+  case BoardColor::Purple:
+    return {PURPLE_DARK, PURPLE_LIGHT};
+
+  case BoardColor::Teal:
+    return {TEAL_DARK, TEAL_LIGHT};
+
+  case BoardColor::Gray:
+    return {GRAY_DARK, GRAY_LIGHT};
+
+  case BoardColor::Chesscom:
+    return {CHESS_DARK, CHESS_LIGHT};
+
+  case BoardColor::Lichess:
+    return {LICHESS_DARK, LICHESS_LIGHT};
+
   default:
-    return {RED_DARK, RED_LIGHT};
+    return {TEAL_DARK, TEAL_LIGHT};
   }
 }
 
@@ -205,8 +271,27 @@ std::string Board::getPieceKey(const Piece &p) {
   }
 }
 
-void Board::drawUI(sf::RenderWindow *window, const sf::Font &font) {
+void Board::drawHighlight(sf::RenderWindow *window) {
+  if (selectedSquare.x < 0 || selectedSquare.y < 0)
+    return;
 
+  if (isDragging)
+    return; // drag sırasında highlight istemiyoruz (çakışma çözümü)
+
+  if (grid[selectedSquare.y][selectedSquare.x].type == PieceType::None)
+    return;
+
+  sf::RectangleShape highlight(sf::Vector2f((float)tileSize, (float)tileSize));
+
+  highlight.setPosition(
+      {selectedSquare.x * (float)tileSize, selectedSquare.y * (float)tileSize});
+
+  highlight.setFillColor(HIGHTLIGHT_COLOR);
+
+  window->draw(highlight);
+}
+
+void Board::drawUI(sf::RenderWindow *window, const sf::Font &font) {
   // ===== PANEL =====
   sf::RectangleShape uiArea(sf::Vector2f(480, 800));
   uiArea.setPosition({800, 0});
@@ -308,7 +393,6 @@ void Board::drawMoving(sf::RenderWindow *window) {
 }
 
 void Board::drawCoords(sf::RenderWindow *window, const sf::Font &font) {
-
   for (int col = 0; col < 8; col++) {
     sf::Text t(font);
     t.setString(std::string(1, 'a' + col));
@@ -337,24 +421,43 @@ void Board::drawCoords(sf::RenderWindow *window, const sf::Font &font) {
 // ================= DRAW =================
 
 void Board::draw(sf::RenderWindow *window) {
-
   auto &assets = Assets::getInstance();
   const sf::Font &coordFont = assets.getFont("coord_font");
 
+  // 1. TILE + HIGHLIGHT + PIECES (layer together)
   for (int row = 0; row < 8; row++) {
     for (int col = 0; col < 8; col++) {
 
       drawTile(window, col, row);
 
-      if (isDragging && dragStartSquare.x == col && dragStartSquare.y == row)
-        continue;
+      // 🔥 highlight BURAYA GELMELİ
+      if (!isDragging && selectedSquare.x == col && selectedSquare.y == row &&
+          grid[row][col].type != PieceType::None) {
 
+        sf::RectangleShape highlight(
+            sf::Vector2f((float)tileSize, (float)tileSize));
+
+        highlight.setPosition({col * (float)tileSize, row * (float)tileSize});
+
+        highlight.setFillColor(HIGHTLIGHT_COLOR);
+
+        window->draw(highlight);
+      }
+
+      // piece her zaman en üstte (ama highlight üstünde glow gibi)
       drawPiece(window, grid[row][col], col, row);
     }
   }
 
+  // 2. overlays
   drawDragged(window);
   drawMoving(window);
+
+  // 3. UI + coords
   drawCoords(window, coordFont);
   drawUI(window, coordFont);
+}
+
+void Board::setTheme(BoardColor newColor) {
+  boardColors = selectStyle(newColor);
 }
