@@ -34,7 +34,6 @@ jobs:
       run: |
         cp /ucrt64/bin/*.dll build/
         cp -r assets build/
-        cp 
 
     - name: Prepare Release Package
       shell: msys2 {0}
