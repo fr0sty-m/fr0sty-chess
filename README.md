@@ -34,6 +34,7 @@ The game uses a custom `.ini` config system:
 ```ini
 [board]
 theme = teal
+pieces = modern
 ```
 
 ### 🔥 Hot Reload
