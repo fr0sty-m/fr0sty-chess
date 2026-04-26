@@ -3,15 +3,17 @@
 #include <SFML/Graphics.hpp>
 
 #include <map>
-#include <memory>
 #include <string>
 
 class Assets {
 private:
-  // Texture'ları isimleriyle tutan harita
+  // Texture'lar
   std::map<std::string, sf::Texture> textures;
 
-  // Singleton yapısı (Her yerden Assets::getInstance() ile erişmek için)
+  // 🔥 Font'lar
+  std::map<std::string, sf::Font> fonts;
+
+  // Singleton
   Assets() = default;
 
 public:
@@ -20,13 +22,15 @@ public:
     return instance;
   }
 
-  // Kopyalamayı engelle (Singleton kuralı)
+  // Kopyalamayı engelle
   Assets(const Assets &) = delete;
   void operator=(const Assets &) = delete;
 
-  // Texture yükleme fonksiyonu
+  // TEXTURE
   bool loadTexture(const std::string &name, const std::string &path);
-
-  // Texture'a erişim
   const sf::Texture &getTexture(const std::string &name) const;
+
+  // 🔥 FONT API
+  bool loadFont(const std::string &name, const std::string &path);
+  const sf::Font &getFont(const std::string &name) const;
 };

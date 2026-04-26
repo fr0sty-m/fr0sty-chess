@@ -59,7 +59,6 @@ void Game::events() {
     }
 
     if (const auto *mouseEvent = event->getIf<sf::Event::MouseMoved>()) {
-
       board->onMouseMoved(sf::Mouse::getPosition(*window));
     }
   }
@@ -80,7 +79,7 @@ void Game::tick() {
 }
 
 void Game::draw() {
-  window->clear(sf::Color{80, 80, 80});
+  window->clear();
 
   board->draw(window);
 

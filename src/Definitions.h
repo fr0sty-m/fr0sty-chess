@@ -14,6 +14,10 @@
 #define BLUE_LIGHT {238, 238, 210}
 #define BLUE_DARK {50, 50, 100}
 
+#define ORANGE_LIGHT {238, 238, 210}
+#define ORANGE_DARK {209, 151, 107}
+
 #define BLACK_LIGHT {238, 238, 210}
 #define BLACK_DARK {53, 53, 53}
+
 #endif
