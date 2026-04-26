@@ -21,7 +21,7 @@ void Game::initGame() {
   std::string boardTheme = cfg.get("theme.board", "teal");
   std::string pieceTheme = cfg.get("theme.pieces", "modern");
 
-  std::vector<std::string> styles = {"modern", "cute"};
+  std::vector<std::string> styles = {"modern", "cute", "cute-rise"};
   std::vector<std::string> colors = {"white_", "black_"};
   std::vector<std::string> types = {"pawn",   "rook",  "knight",
                                     "bishop", "queen", "king"};
