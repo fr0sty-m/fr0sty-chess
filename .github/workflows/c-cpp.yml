@@ -34,6 +34,7 @@ jobs:
       run: |
         cp /ucrt64/bin/*.dll build/
         cp -r assets build/
+        cp 
 
     - name: Prepare Release Package
       shell: msys2 {0}
@@ -42,6 +43,7 @@ jobs:
         cp build/*.exe dist/
         cp build/*.dll dist/
         cp -r assets dist/
+        cp -r config.ini dist/
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
