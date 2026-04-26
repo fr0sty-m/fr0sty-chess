@@ -64,8 +64,6 @@ private:
   void drawLegalMoves(sf::RenderWindow *window);
 
 public:
-  Board(BoardColor boardColor, GameManager *gm);
-  Board(std::string boardColor, GameManager *gm);
   Board(std::string boardColor, std::string pieceStyle, GameManager *gm);
 
   colors boardColors;

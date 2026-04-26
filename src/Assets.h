@@ -1,5 +1,6 @@
 #pragma once
 
+#include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
 
 #include <map>
@@ -7,11 +8,10 @@
 
 class Assets {
 private:
-  // Texture'lar
   std::map<std::string, sf::Texture> textures;
-
-  // 🔥 Font'lar
+  std::map<std::string, sf::SoundBuffer> soundBuffers;
   std::map<std::string, sf::Font> fonts;
+  std::map<std::string, std::unique_ptr<sf::Sound>> readySounds;
 
   // Singleton
   Assets() = default;
@@ -33,4 +33,7 @@ public:
   // 🔥 FONT API
   bool loadFont(const std::string &name, const std::string &path);
   const sf::Font &getFont(const std::string &name) const;
+
+  bool loadSound(const std::string &name, const std::string &path);
+  bool playSound(const std::string &name);
 };

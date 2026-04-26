@@ -10,42 +10,18 @@
 
 // ================= CONSTRUCTOR =================
 
-Board::Board(BoardColor boardColor, GameManager *gm)
-    : boardColors(selectStyle(boardColor)), tileSize(100), gameManager(gm) {
-
-  selectedSquare = {-1, -1};
-
-  Assets::getInstance().loadFont(
-      "main", "/usr/share/fonts/TTF/CaskaydiaCoveNerdFont-Bold.ttf");
-
-  Assets::getInstance().loadFont("coord_font",
-                                 "/usr/share/fonts/TTF/Hack-Bold.ttf");
-}
-
-Board::Board(std::string boardColor, GameManager *gm)
-    : boardColors(selectStyle(themeToColor(boardColor))), tileSize(100),
-      gameManager(gm) {
-  selectedSquare = {-1, -1};
-
-  Assets::getInstance().loadFont(
-      "main", "/usr/share/fonts/TTF/CaskaydiaCoveNerdFont-Bold.ttf");
-
-  Assets::getInstance().loadFont("coord_font",
-                                 "/usr/share/fonts/TTF/Hack-Bold.ttf");
-
-  std::string theme = Config::getInstance().get("theme.board", "teal");
-}
-
 Board::Board(std::string boardColor, std::string pieceStyle, GameManager *gm)
     : boardColors(selectStyle(themeToColor(boardColor))), tileSize(100),
       pieceStyle(pieceStyle), gameManager(gm) {
   selectedSquare = {-1, -1};
 
-  Assets::getInstance().loadFont(
-      "main", "/usr/share/fonts/TTF/CaskaydiaCoveNerdFont-Bold.ttf");
+  Assets::getInstance().loadFont("main",
+                                 "assets/fonts/CaskaydiaCoveNerdFont-Bold.ttf");
 
-  Assets::getInstance().loadFont("coord_font",
-                                 "/usr/share/fonts/TTF/Hack-Bold.ttf");
+  Assets::getInstance().loadFont("coord_font", "assets/fonts/Hack-Bold.ttf");
+
+  Assets::getInstance().loadSound("piece_move",
+                                  "assets/sounds/chess_piece.wav");
 
   std::string theme = Config::getInstance().get("theme.board", "teal");
 }
@@ -173,6 +149,8 @@ void Board::onMouseReleased(sf::Vector2i mousePos) {
                                                     PieceColor::None};
       grid[row][col] = draggedPiece;
 
+      Assets::getInstance().playSound("piece_move");
+
       gameManager->addMove(dragStartSquare, {col, row}, draggedPiece, false);
       gameManager->switchTurn();
       // legalMoves.clear();
@@ -225,6 +203,7 @@ void Board::handleInput(sf::Vector2i mousePos) {
 
       bool isCapture = (grid[row][col].type != PieceType::None);
 
+      Assets::getInstance().playSound("piece_move");
       gameManager->addMove(selectedSquare, {col, row}, movingPiece.piece,
                            isCapture);
       gameManager->switchTurn();
@@ -317,10 +296,15 @@ void Board::drawHighlight(sf::RenderWindow *window) {
 
 void Board::drawUI(sf::RenderWindow *window, const sf::Font &font) {
   // ===== PANEL =====
-  sf::RectangleShape uiArea(sf::Vector2f(480, 800));
-  uiArea.setPosition({800, 0});
-  uiArea.setFillColor(sf::Color(26, 27, 38));
-  window->draw(uiArea);
+  sf::RectangleShape uiAreaB(sf::Vector2f(480, 400));
+  uiAreaB.setPosition({800, 0});
+  uiAreaB.setFillColor(sf::Color(100, 100, 100));
+  window->draw(uiAreaB);
+
+  sf::RectangleShape uiAreaW(sf::Vector2f(480, 400));
+  uiAreaW.setPosition({800, 400});
+  uiAreaW.setFillColor(sf::Color(26, 27, 38));
+  window->draw(uiAreaW);
 
   // ===== BLACK TEXT =====
   sf::Text blackText(font);
@@ -423,7 +407,12 @@ void Board::drawCoords(sf::RenderWindow *window, const sf::Font &font) {
     t.setCharacterSize(16);
 
     bool light = ((7 + col) % 2 == 0);
-    t.setFillColor(light ? sf::Color::Black : sf::Color::White);
+    sf::Color tileColor = light ? boardColors.white : boardColors.black;
+
+    int luminance =
+        0.299f * tileColor.r + 0.587f * tileColor.g + 0.114f * tileColor.b;
+
+    t.setFillColor(luminance > 128 ? sf::Color::Black : sf::Color::White);
 
     t.setPosition({col * tileSize + tileSize - 18.f, 8 * tileSize - 20.f});
     window->draw(t);
@@ -435,7 +424,12 @@ void Board::drawCoords(sf::RenderWindow *window, const sf::Font &font) {
     t.setCharacterSize(16);
 
     bool light = ((row + 0) % 2 == 0);
-    t.setFillColor(light ? sf::Color::Black : sf::Color::White);
+    sf::Color tileColor = light ? boardColors.white : boardColors.black;
+
+    int luminance =
+        0.299f * tileColor.r + 0.587f * tileColor.g + 0.114f * tileColor.b;
+
+    t.setFillColor(luminance > 128 ? sf::Color::Black : sf::Color::White);
 
     t.setPosition({4.f, row * tileSize + 4.f});
     window->draw(t);
@@ -494,7 +488,6 @@ void Board::draw(sf::RenderWindow *window) {
       }
 
       drawLegalMoves(window);
-      // piece her zaman en üstte (ama highlight üstünde glow gibi)
       drawPiece(window, grid[row][col], col, row);
     }
   }
