@@ -2,6 +2,7 @@
 
 #include <SFML/Graphics.hpp>
 
+// colors struct for making the project easier to handle
 struct colors {
   sf::Color black, white;
 
