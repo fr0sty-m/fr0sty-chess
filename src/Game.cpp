@@ -18,26 +18,27 @@ void Game::initGame() {
 
   cfg.load("./config.ini");
 
-  std::string boardTheme = cfg.get("board.theme", "teal");
+  std::string boardTheme = cfg.get("theme.board", "teal");
+  std::string pieceTheme = cfg.get("theme.pieces", "modern");
 
-  // Yükleme listesi (İsimleri Board.cpp'deki switch ile uyumlu yapıyoruz)
+  std::vector<std::string> styles = {"modern", "cute"};
   std::vector<std::string> colors = {"white_", "black_"};
   std::vector<std::string> types = {"pawn",   "rook",  "knight",
                                     "bishop", "queen", "king"};
 
-  for (const auto &c : colors) {
-    for (const auto &t : types) {
-      std::string key = c + t;
-      std::string path = "assets/" + key + ".png";
+  for (const auto &style : styles) {
+    for (const auto &c : colors) {
+      for (const auto &t : types) {
 
-      if (!assets.loadTexture(key, path)) {
-        printf("ERROR: %s Could not load! Path: %s\n", key.c_str(),
-               path.c_str());
+        std::string key = style + "/" + c + t;
+        std::string path = "assets/" + style + "/" + c + t + ".png";
+
+        assets.loadTexture(key, path);
       }
     }
   }
 
-  board = new Board(boardTheme, &gm);
+  board = new Board(boardTheme, pieceTheme, &gm);
   board->setupPieces();
 }
 
@@ -71,9 +72,12 @@ void Game::events() {
       if (keyEvent->code == sf::Keyboard::Key::F5) {
         Config::getInstance().reload();
 
-        std::string newTheme = Config::getInstance().get("board.theme", "teal");
+        std::string newTheme = Config::getInstance().get("theme.board", "teal");
+        std::string newPieces =
+            Config::getInstance().get("theme.pieces", "modern");
 
         board->setTheme(Board::themeToColor(newTheme));
+        board->setPieceStyle(newPieces);
       }
     }
   }

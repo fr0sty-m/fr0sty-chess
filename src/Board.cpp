@@ -33,7 +33,21 @@ Board::Board(std::string boardColor, GameManager *gm)
   Assets::getInstance().loadFont("coord_font",
                                  "/usr/share/fonts/TTF/Hack-Bold.ttf");
 
-  std::string theme = Config::getInstance().get("board.theme", "teal");
+  std::string theme = Config::getInstance().get("theme.board", "teal");
+}
+
+Board::Board(std::string boardColor, std::string pieceStyle, GameManager *gm)
+    : boardColors(selectStyle(themeToColor(boardColor))), tileSize(100),
+      pieceStyle(pieceStyle), gameManager(gm) {
+  selectedSquare = {-1, -1};
+
+  Assets::getInstance().loadFont(
+      "main", "/usr/share/fonts/TTF/CaskaydiaCoveNerdFont-Bold.ttf");
+
+  Assets::getInstance().loadFont("coord_font",
+                                 "/usr/share/fonts/TTF/Hack-Bold.ttf");
+
+  std::string theme = Config::getInstance().get("theme.board", "teal");
 }
 
 // ================= STYLE =================
@@ -127,6 +141,8 @@ void Board::onMouseMoved(sf::Vector2i mousePos) {
         grid[row][col].type == PieceType::None)
       return;
 
+    legalMoves = MoveValidator::getLegalMoves({col, row}, grid);
+
     isDragging = true;
     draggedPiece = grid[row][col];
     grid[row][col] = {PieceType::None, PieceColor::None};
@@ -159,10 +175,12 @@ void Board::onMouseReleased(sf::Vector2i mousePos) {
 
       gameManager->addMove(dragStartSquare, {col, row}, draggedPiece, false);
       gameManager->switchTurn();
+      // legalMoves.clear();
     }
 
     isDragging = false;
     selectedSquare = {-1, -1};
+    legalMoves.clear();
   } else {
     handleInput(mousePos);
   }
@@ -182,11 +200,14 @@ void Board::handleInput(sf::Vector2i mousePos) {
     if (grid[row][col].type != PieceType::None &&
         grid[row][col].color == gameManager->getCurrentTurn()) {
       selectedSquare = {col, row};
+
+      legalMoves = MoveValidator::getLegalMoves(selectedSquare, grid);
     }
   } else {
 
     if (selectedSquare.x == col && selectedSquare.y == row) {
       selectedSquare = {-1, -1};
+      legalMoves.clear();
       return;
     }
 
@@ -210,6 +231,7 @@ void Board::handleInput(sf::Vector2i mousePos) {
     }
 
     selectedSquare = {-1, -1};
+    legalMoves.clear();
   }
 }
 
@@ -251,23 +273,25 @@ void Board::setupPieces() {
 // ================= HELPERS =================
 
 std::string Board::getPieceKey(const Piece &p) {
+  std::string style = pieceStyle.empty() ? "modern" : pieceStyle;
+
   std::string color = (p.color == PieceColor::Black) ? "black_" : "white_";
 
   switch (p.type) {
   case PieceType::Pawn:
-    return color + "pawn";
+    return style + "/" + color + "pawn";
   case PieceType::Rook:
-    return color + "rook";
+    return style + "/" + color + "rook";
   case PieceType::Knight:
-    return color + "knight";
+    return style + "/" + color + "knight";
   case PieceType::Bishop:
-    return color + "bishop";
+    return style + "/" + color + "bishop";
   case PieceType::Queen:
-    return color + "queen";
+    return style + "/" + color + "queen";
   case PieceType::King:
-    return color + "king";
+    return style + "/" + color + "king";
   default:
-    return "";
+    return "modern/white_pawn";
   }
 }
 
@@ -276,7 +300,7 @@ void Board::drawHighlight(sf::RenderWindow *window) {
     return;
 
   if (isDragging)
-    return; // drag sırasında highlight istemiyoruz (çakışma çözümü)
+    return;
 
   if (grid[selectedSquare.y][selectedSquare.x].type == PieceType::None)
     return;
@@ -418,6 +442,32 @@ void Board::drawCoords(sf::RenderWindow *window, const sf::Font &font) {
   }
 }
 
+void Board::drawLegalMoves(sf::RenderWindow *window) {
+  for (auto &pos : legalMoves) {
+
+    bool isCapture = grid[pos.y][pos.x].type != PieceType::None;
+
+    if (isCapture) {
+      sf::CircleShape ring(tileSize / 2.f - 6.f);
+      ring.setPosition({pos.x * tileSize + 6.f, pos.y * tileSize + 6.f});
+
+      ring.setFillColor(sf::Color::Transparent);
+      ring.setOutlineThickness(4.f);
+      ring.setOutlineColor(sf::Color(120, 255, 120, 180));
+
+      window->draw(ring);
+    } else {
+      sf::CircleShape dot(tileSize / 6.f);
+      dot.setPosition({pos.x * tileSize + tileSize / 2.f - dot.getRadius(),
+                       pos.y * tileSize + tileSize / 2.f - dot.getRadius()});
+
+      dot.setFillColor(HIGHTLIGHT_COLOR);
+
+      window->draw(dot);
+    }
+  }
+}
+
 // ================= DRAW =================
 
 void Board::draw(sf::RenderWindow *window) {
@@ -430,7 +480,6 @@ void Board::draw(sf::RenderWindow *window) {
 
       drawTile(window, col, row);
 
-      // 🔥 highlight BURAYA GELMELİ
       if (!isDragging && selectedSquare.x == col && selectedSquare.y == row &&
           grid[row][col].type != PieceType::None) {
 
@@ -444,20 +493,25 @@ void Board::draw(sf::RenderWindow *window) {
         window->draw(highlight);
       }
 
+      drawLegalMoves(window);
       // piece her zaman en üstte (ama highlight üstünde glow gibi)
       drawPiece(window, grid[row][col], col, row);
     }
   }
 
   // 2. overlays
-  drawDragged(window);
   drawMoving(window);
 
   // 3. UI + coords
   drawCoords(window, coordFont);
   drawUI(window, coordFont);
+  drawDragged(window);
 }
 
 void Board::setTheme(BoardColor newColor) {
   boardColors = selectStyle(newColor);
+}
+
+void Board::setPieceStyle(const std::string &style) {
+  pieceStyle = style.empty() ? "modern" : style;
 }

@@ -38,6 +38,29 @@ bool MoveValidator::isValidMove(sf::Vector2i start, sf::Vector2i end,
   }
 }
 
+std::vector<sf::Vector2i> MoveValidator::getLegalMoves(sf::Vector2i start,
+                                                       const Piece grid[8][8]) {
+
+  std::vector<sf::Vector2i> moves;
+
+  Piece p = grid[start.y][start.x];
+  if (p.type == PieceType::None)
+    return moves;
+
+  for (int y = 0; y < 8; y++) {
+    for (int x = 0; x < 8; x++) {
+
+      sf::Vector2i end = {x, y};
+
+      if (isValidMove(start, end, grid)) {
+        moves.push_back(end);
+      }
+    }
+  }
+
+  return moves;
+}
+
 bool MoveValidator::isPathClear(sf::Vector2i start, sf::Vector2i end,
                                 const Piece grid[8][8]) {
   int dx = (end.x == start.x) ? 0 : (end.x > start.x ? 1 : -1);

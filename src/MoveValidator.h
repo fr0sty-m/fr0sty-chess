@@ -10,6 +10,8 @@ public:
   // Ana giriş kapısı
   static bool isValidMove(sf::Vector2i start, sf::Vector2i end,
                           const Piece grid[8][8]);
+  static std::vector<sf::Vector2i> getLegalMoves(sf::Vector2i start,
+                                                 const Piece grid[8][8]);
 
 private:
   static bool isPathClear(sf::Vector2i start, sf::Vector2i end,

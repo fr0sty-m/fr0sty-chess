@@ -14,7 +14,6 @@ const sf::Texture &Assets::getTexture(const std::string &name) const {
   return textures.at(name);
 }
 
-// 🔥 FONT LOAD
 bool Assets::loadFont(const std::string &name, const std::string &path) {
   sf::Font font;
   if (!font.openFromFile(path)) {
@@ -24,7 +23,6 @@ bool Assets::loadFont(const std::string &name, const std::string &path) {
   return true;
 }
 
-// 🔥 FONT GET
 const sf::Font &Assets::getFont(const std::string &name) const {
   return fonts.at(name);
 }

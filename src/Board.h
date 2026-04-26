@@ -46,7 +46,11 @@ private:
 
   MovingPiece movingPiece;
 
+  std::string pieceStyle;
+
   GameManager *gameManager;
+
+  std::vector<sf::Vector2i> legalMoves;
 
   // ===== HELPERS =====
   std::string getPieceKey(const Piece &p);
@@ -57,16 +61,20 @@ private:
   void drawCoords(sf::RenderWindow *window, const sf::Font &font);
   void drawUI(sf::RenderWindow *window, const sf::Font &font);
   void drawHighlight(sf::RenderWindow *window);
+  void drawLegalMoves(sf::RenderWindow *window);
 
 public:
   Board(BoardColor boardColor, GameManager *gm);
   Board(std::string boardColor, GameManager *gm);
+  Board(std::string boardColor, std::string pieceStyle, GameManager *gm);
 
   colors boardColors;
 
   colors selectStyle(BoardColor boardColor);
   static BoardColor themeToColor(const std::string &theme);
+
   void setTheme(BoardColor newColor);
+  void setPieceStyle(const std::string &style);
 
   void setupPieces();
 
