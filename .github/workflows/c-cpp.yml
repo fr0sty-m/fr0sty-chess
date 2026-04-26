@@ -43,7 +43,7 @@ jobs:
         cp build/*.exe dist/
         cp build/*.dll dist/
         cp -r assets dist/
-        cp -r config.ini dist/
+        cp ./config.ini dist/
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
