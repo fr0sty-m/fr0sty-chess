@@ -59,6 +59,12 @@ Currently supported themes:
 * `chesscom`
 * `lichess`
 
+Currently supported pieces:
+
+* `modern`
+* `cute`
+* `cute-rise`
+
 Easily changeable via config system.
 
 ---
