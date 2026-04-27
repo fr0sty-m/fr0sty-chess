@@ -44,8 +44,13 @@ jobs:
         cp -r assets dist/
         cp ./config.ini dist/
 
+    - name: Compress Release Package
+      shell: msys2 {0}
+      run: |
+        cd dist && 7z a -t7z -mx9 ../fr0sty-chess-windows-x64.7z ./*
+
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
         name: fr0sty-chess-windows-x64
-        path: dist/
+        path: fr0sty-chess-windows-x64.7z
