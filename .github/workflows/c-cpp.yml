@@ -22,6 +22,7 @@ jobs:
           mingw-w64-ucrt-x86_64-toolchain
           mingw-w64-ucrt-x86_64-cmake
           mingw-w64-ucrt-x86_64-sfml
+          p7zip
 
     - name: Build Project
       shell: msys2 {0}
