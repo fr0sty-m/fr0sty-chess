@@ -32,8 +32,8 @@ This project is not just a chess game — it's designed with **engine-like struc
 The game uses a custom `.ini` config system:
 
 ```ini
-[board]
-theme = teal
+[theme]
+board = teal
 pieces = modern
 ```
 
