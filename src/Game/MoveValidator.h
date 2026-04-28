@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Piece.h"
+#include "Utils/Piece.h"
 
 #include <SFML/System/Vector2.hpp>
 #include <cmath>

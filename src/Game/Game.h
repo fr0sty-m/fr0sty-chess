@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Board.h"
+#include "Board/Board.h"
 #include "GameManager.h"
 
 #include <SFML/Graphics.hpp>

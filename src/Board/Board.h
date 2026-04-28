@@ -1,27 +1,11 @@
 #pragma once
 
-#include "Colors.h"
-#include "GameManager.h"
-#include "Piece.h"
+#include "Game/GameManager.h"
+#include "Utils/Colors.h"
+#include "Utils/Definitions.h"
+#include "Utils/Piece.h"
 
 #include <SFML/Graphics.hpp>
-
-// ================= BOARD COLOR ======================
-enum class BoardColor {
-  None,
-  Orange,
-  Green,
-  Red,
-  Blue,
-  Black,
-  Dark,
-  Purple,
-  Gray,
-  Chesscom,
-  Teal,
-  Lichess,
-};
-// ====================================================
 
 class Board {
 private:
@@ -52,7 +36,7 @@ private:
 
   std::vector<sf::Vector2i> legalMoves;
 
-  // ===== HELPERS =====
+  // ==================== HELPERS =========================
   std::string getPieceKey(const Piece &p);
   void drawTile(sf::RenderWindow *window, int col, int row);
   void drawPiece(sf::RenderWindow *window, const Piece &p, int col, int row);
