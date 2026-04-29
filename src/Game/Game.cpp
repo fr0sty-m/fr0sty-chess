@@ -1,10 +1,10 @@
 #include "Game.h"
 
-#include "Assets.h"
-#include "Board.h"
-#include "Config.h"
+#include "Assets/Assets.h"
+#include "Board/Board.h"
+#include "Config/Config.h"
 
-#include <iostream>
+#include "Utils/Functions.h"
 
 Game::Game() { this->initGame(); }
 
@@ -76,7 +76,7 @@ void Game::events() {
         std::string newPieces =
             Config::getInstance().get("theme.pieces", "modern");
 
-        board->setTheme(Board::themeToColor(newTheme));
+        board->setTheme(Functions::themeToColor(newTheme));
         board->setPieceStyle(newPieces);
       }
     }

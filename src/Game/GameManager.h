@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Piece.h"
+#include "Utils/Piece.h"
 
 #include <vector>
 
