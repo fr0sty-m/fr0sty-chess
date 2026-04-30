@@ -9,18 +9,21 @@ add_executable(${PROJECT_NAME}
   Utils/Functions.h
   Utils/Piece.h
   Utils/Utils.h
+  Utils/BoardData.h
 
   Board/Board.cpp
   Board/Board.h
+  Board/BoardRenderer.cpp
+  Board/BoardRenderer.h
 
   Game/Game.cpp
   Game/Game.h
-
   Game/MoveValidator.cpp
   Game/MoveValidator.h
-
   Game/GameManager.cpp
   Game/GameManager.h
+  Game/Input.cpp
+  Game/Input.h
 
   Assets/Assets.cpp
   Assets/Assets.h

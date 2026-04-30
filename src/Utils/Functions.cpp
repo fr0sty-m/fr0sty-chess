@@ -1,5 +1,6 @@
 #include "Functions.h"
 
+#include "BoardData.h"
 #include "Definitions.h"
 
 namespace Functions {
@@ -70,6 +71,35 @@ colors selectStyle(BoardColor style) {
   default:
     return {TEAL_DARK, TEAL_LIGHT};
   }
+}
+
+std::string getPieceKey(const Piece &p, const BoardData &boardData) {
+  std::string style =
+      boardData.pieceStyle.empty() ? "modern" : boardData.pieceStyle;
+
+  std::string color = (p.color == PieceColor::Black) ? "black_" : "white_";
+
+  switch (p.type) {
+  case PieceType::Pawn:
+    return style + "/" + color + "pawn";
+  case PieceType::Rook:
+    return style + "/" + color + "rook";
+  case PieceType::Knight:
+    return style + "/" + color + "knight";
+  case PieceType::Bishop:
+    return style + "/" + color + "bishop";
+  case PieceType::Queen:
+    return style + "/" + color + "queen";
+  case PieceType::King:
+    return style + "/" + color + "king";
+  default:
+    return "modern/white_pawn";
+  }
+}
+
+sf::Vector2f getTileCenter(int col, int row, int tileSize) {
+  return sf::Vector2f(col * tileSize + tileSize / 2.f,
+                      row * tileSize + tileSize / 2.f);
 }
 
 } // namespace Functions

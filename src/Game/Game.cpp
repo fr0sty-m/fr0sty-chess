@@ -48,25 +48,26 @@ void Game::events() {
     if (event->is<sf::Event::Closed>())
       window->close();
 
+    sf::Vector2i mousePos = sf::Mouse::getPosition(*window);
+
+    // Pressed
     if (const auto *mouseEvent =
             event->getIf<sf::Event::MouseButtonPressed>()) {
-
       if (mouseEvent->button == sf::Mouse::Button::Left) {
-        board->onMousePressed(sf::Mouse::getPosition(*window));
+        // Board artık inputHandler üzerinden yönetecek
+        board->handleMousePressed(mousePos);
       }
     }
 
+    // Released
     if (const auto *mouseEvent =
             event->getIf<sf::Event::MouseButtonReleased>()) {
-
       if (mouseEvent->button == sf::Mouse::Button::Left) {
-        board->onMouseReleased(sf::Mouse::getPosition(*window));
+        board->handleMouseReleased(mousePos);
       }
     }
 
-    if (const auto *mouseEvent = event->getIf<sf::Event::MouseMoved>()) {
-      board->onMouseMoved(sf::Mouse::getPosition(*window));
-    }
+    board->handleMouseMoved(mousePos);
 
     if (const auto *keyEvent = event->getIf<sf::Event::KeyPressed>()) {
       if (keyEvent->code == sf::Keyboard::Key::F5) {
