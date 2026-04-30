@@ -8,7 +8,7 @@
 struct Input {
   static bool mousePressed;
   static sf::Vector2i dragStartSquare;
-  static const int DRAG_THRESHOLD = 70;
+  static const int DRAG_THRESHOLD = 100;
 
   static void onMousePressed(sf::Vector2i mousePos, BoardData &boardData);
   static void onMouseMoved(sf::Vector2i mousePos, BoardData &boardData);

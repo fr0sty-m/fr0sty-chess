@@ -55,7 +55,6 @@ void Input::onMouseReleased(sf::Vector2i mousePos, BoardData &boardData,
   int row = mousePos.y / boardData.tileSize;
 
   if (boardData.isDragging) {
-    // Sürükleme işlemi bitişi
     boardData.grid[dragStartSquare.y][dragStartSquare.x] =
         boardData.draggedPiece;
 
@@ -75,7 +74,7 @@ void Input::onMouseReleased(sf::Vector2i mousePos, BoardData &boardData,
     }
 
     boardData.isDragging = false;
-    boardData.selectedSquare = {-1, -1}; // Sürükleme yapıldıysa seçimi sıfırla
+    boardData.selectedSquare = {-1, -1};
     boardData.legalMoves.clear();
   } else {
     // Sürükleme yapılmadıysa tıklama olarak işle
