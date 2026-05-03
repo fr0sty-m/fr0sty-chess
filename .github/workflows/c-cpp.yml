@@ -40,8 +40,8 @@ jobs:
       shell: msys2 {0}
       run: |
         mkdir -p dist
-        cp build/*.exe dist/
-        cp build/*.dll dist/
+        cp build/src/*.exe dist/
+        cp build/src/*.dll dist/
         cp -r assets dist/
         cp ./config.ini dist/
 
