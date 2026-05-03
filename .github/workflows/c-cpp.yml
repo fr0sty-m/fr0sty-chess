@@ -24,32 +24,34 @@ jobs:
           mingw-w64-ucrt-x86_64-sfml
           p7zip
 
-    - name: Build Project
+    - name: Configure and Build
       shell: msys2 {0}
       run: |
+        # Build klasörünü oluştur ve konfigüre et
         cmake -B build -S . -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release
-        cmake --build build
-
-    - name: Copy DLL and Delete Build Files
-      shell: msys2 {0}
-      run: |
-        cp /ucrt64/bin/*.dll build/
-        cp -r assets build/
+        # Derle
+        cmake --build build --config Release
 
     - name: Prepare Release Package
       shell: msys2 {0}
       run: |
         mkdir -p dist
-        ls
+        
+        # Binary dosyasını kopyala (src altında olduğunu varsayıyorum)
         cp build/src/*.exe dist/
-        cp build/src/*.dll dist/
-        cp -r assets dist/
-        cp ./config.ini dist/
+        
+        # Assets ve Config dosyalarını kopyala# ÖNEMLİ: Tüm DLL'leri kopyalamak yerine sadece g
+        [ -d "assets" ] && cp -r assets dist/
+        [ -f "config.ini" ] && cp config.ini dist/
+        
+        # ÖNEMLİ: Tüm DLL'leri kopyalamak yerine sadece gerekli olanları alalım
+        # SFML ve UCRT bağımlılıklarını dist içine taşır
+        ldd dist/*.exe | grep -iv "system32" | awk '{print $3}' | xargs -I {} cp {} dist/
 
     - name: Compress Release Package
       shell: msys2 {0}
       run: |
-        cd dist && 7z a -t7z -mx9 ../fr0sty-chess-windows-x64.7z ./*
+        7z a -t7z -mx9 fr0sty-chess-windows-x64.7z ./dist/*
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
