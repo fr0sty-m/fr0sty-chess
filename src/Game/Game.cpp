@@ -5,6 +5,7 @@
 #include "Config/Config.h"
 
 #include "Utils/Functions.h"
+#include "Utils/Piece.h"
 
 Game::Game() { this->initGame(); }
 
@@ -16,27 +17,12 @@ void Game::initGame() {
   auto &assets = Assets::getInstance();
   auto &cfg = Config::getInstance();
 
+  themeManager.loadThemes("assets/theme");
+
   cfg.load("./config.ini");
 
   std::string boardTheme = cfg.get("theme.board", "teal");
   std::string pieceTheme = cfg.get("theme.pieces", "modern");
-
-  std::vector<std::string> styles = {"modern", "cute", "cute-rise"};
-  std::vector<std::string> colors = {"white_", "black_"};
-  std::vector<std::string> types = {"pawn",   "rook",  "knight",
-                                    "bishop", "queen", "king"};
-
-  for (const auto &style : styles) {
-    for (const auto &c : colors) {
-      for (const auto &t : types) {
-
-        std::string key = style + "/" + c + t;
-        std::string path = "assets/" + style + "/" + c + t + ".png";
-
-        assets.loadTexture(key, path);
-      }
-    }
-  }
 
   board = new Board(boardTheme, pieceTheme, &gm);
   board->setupPieces();
@@ -54,7 +40,6 @@ void Game::events() {
     if (const auto *mouseEvent =
             event->getIf<sf::Event::MouseButtonPressed>()) {
       if (mouseEvent->button == sf::Mouse::Button::Left) {
-        // Board artık inputHandler üzerinden yönetecek
         board->handleMousePressed(mousePos);
       }
     }
@@ -70,6 +55,7 @@ void Game::events() {
     board->handleMouseMoved(mousePos);
 
     if (const auto *keyEvent = event->getIf<sf::Event::KeyPressed>()) {
+      // RELOAD CONFIG ON PRESS 'F5'
       if (keyEvent->code == sf::Keyboard::Key::F5) {
         Config::getInstance().reload();
 
@@ -79,6 +65,14 @@ void Game::events() {
 
         board->setTheme(Functions::themeToColor(newTheme));
         board->setPieceStyle(newPieces);
+      }
+      // RESTART GAME ON PRESS 'R'
+      if (keyEvent->code == sf::Keyboard::Key::R) {
+        board =
+            new Board(Config::getInstance().get("theme.board", "teal"),
+                      Config::getInstance().get("theme.pieces", "modern"), &gm);
+        board->setupPieces();
+        gm.setCurrentTurn(PieceColor::White);
       }
     }
   }

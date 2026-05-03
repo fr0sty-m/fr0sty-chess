@@ -24,6 +24,7 @@ public:
 
   // Oyun durumu (Şu an basit, sonra geliştireceğiz)
   bool isGameOver() const { return gameOver; }
+  void setCurrentTurn(PieceColor turn) { currentTurn = turn; }
 
 private:
   PieceColor currentTurn;

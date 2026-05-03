@@ -1,6 +1,7 @@
 find_package(SFML 3.0 REQUIRED COMPONENTS Graphics Window System Audio)
 
-add_executable(${PROJECT_NAME}
+if(WIN32)
+  add_executable(fr0sty-chess WIN32
   main.cpp
 
   Utils/Colors.h
@@ -30,8 +31,44 @@ add_executable(${PROJECT_NAME}
 
   Config/Config.cpp
   Config/Config.h
-
+  Config/ThemeManager.cpp
+  Config/ThemeManager.h
 )
+else()
+  add_executable(${PROJECT_NAME}
+  main.cpp
+
+  Utils/Colors.h
+  Utils/Definitions.h
+  Utils/Functions.cpp
+  Utils/Functions.h
+  Utils/Piece.h
+  Utils/Utils.h
+  Utils/BoardData.h
+
+  Board/Board.cpp
+  Board/Board.h
+  Board/BoardRenderer.cpp
+  Board/BoardRenderer.h
+
+  Game/Game.cpp
+  Game/Game.h
+  Game/MoveValidator.cpp
+  Game/MoveValidator.h
+  Game/GameManager.cpp
+  Game/GameManager.h
+  Game/Input.cpp
+  Game/Input.h
+
+  Assets/Assets.cpp
+  Assets/Assets.h
+
+  Config/Config.cpp
+  Config/Config.h
+  Config/ThemeManager.cpp
+  Config/ThemeManager.h
+)
+endif()
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/src)
 
